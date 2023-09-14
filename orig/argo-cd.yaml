@@ -10,7 +10,7 @@ spec:
   source:
     path: argo-cd/overlays/production
     repoURL: https://github.com/marcellmartini/crossplane-kubevela-argocd-demo
-    targetRevision: HEAD
+    targetRevision: old-master
   destination:
     server: https://kubernetes.default.svc
   syncPolicy:
@@ -18,4 +18,3 @@ spec:
       selfHeal: true
       prune: true
       allowEmpty: true
-

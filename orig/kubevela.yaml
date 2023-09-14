@@ -1,21 +1,28 @@
+---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: team-a-infra
+  name: kubevela
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: production
   source:
-    path: team-a-infra
-    repoURL: https://github.com/marcellmartini/crossplane-kubevela-argocd-demo
-    targetRevision: HEAD
+    chart: vela-core
+    repoURL: https://charts.kubevela.net/core
+    targetRevision: "1.0.7"
+    helm:
+      parameters:
+        - name: "multicluster.clusterGateway.direct"
+          value: "false"
   destination:
+    namespace: vela-system
     server: https://kubernetes.default.svc
   syncPolicy:
     automated:
       selfHeal: true
       prune: true
       allowEmpty: true
-
+    syncOptions:
+      - CreateNamespace=true

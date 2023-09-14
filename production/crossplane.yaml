@@ -1,18 +1,17 @@
 ---
-
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: crossplane
   namespace: argocd
   finalizers:
-  - resources-finalizer.argocd.argoproj.io
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: production
   source:
     chart: crossplane
     repoURL: https://charts.crossplane.io/stable
-    targetRevision: "1.3.0"
+    targetRevision: "1.13.2"
   destination:
     namespace: crossplane-system
     server: https://kubernetes.default.svc
@@ -22,10 +21,9 @@ spec:
       prune: true
       allowEmpty: true
     syncOptions:
-    - CreateNamespace=true
+      - CreateNamespace=true
 
 ---
-
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -38,7 +36,7 @@ spec:
   source:
     path: crossplane-providers
     repoURL: https://github.com/marcellmartini/crossplane-kubevela-argocd-demo
-    targetRevision: HEAD
+    targetRevision: old-master
   destination:
     server: https://kubernetes.default.svc
   syncPolicy:
@@ -48,7 +46,6 @@ spec:
       allowEmpty: true
 
 ---
-
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -61,7 +58,7 @@ spec:
   source:
     path: crossplane-configs
     repoURL: https://github.com/marcellmartini/crossplane-kubevela-argocd-demo
-    targetRevision: HEAD
+    targetRevision: old-master
   destination:
     server: https://kubernetes.default.svc
   syncPolicy:
@@ -71,7 +68,6 @@ spec:
       allowEmpty: true
 
 ---
-
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -84,7 +80,7 @@ spec:
   source:
     path: crossplane-compositions
     repoURL: https://github.com/marcellmartini/crossplane-kubevela-argocd-demo
-    targetRevision: HEAD
+    targetRevision: old-master
   destination:
     server: https://kubernetes.default.svc
   syncPolicy:
@@ -92,4 +88,3 @@ spec:
       selfHeal: true
       prune: true
       allowEmpty: true
-

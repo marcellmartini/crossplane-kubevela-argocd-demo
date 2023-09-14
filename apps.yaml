@@ -1,5 +1,4 @@
 ---
-
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -11,7 +10,7 @@ spec:
   project: production
   source:
     repoURL: https://github.com/marcellmartini/crossplane-kubevela-argocd-demo
-    targetRevision: HEAD
+    targetRevision: old-master
     path: production
   destination:
     server: https://kubernetes.default.svc

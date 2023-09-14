@@ -10,14 +10,13 @@ spec:
   source:
     path: team-a-apps
     repoURL: https://github.com/marcellmartini/crossplane-kubevela-argocd-demo
-    targetRevision: HEAD
+    targetRevision: old-master
   destination:
-    server: team-a
-    namespace: production
+    server: https://kubernetes.default.svc
   syncPolicy:
     automated:
       selfHeal: true
       prune: true
       allowEmpty: true
     syncOptions:
-    - CreateNamespace=true
+      - CreateNamespace=true

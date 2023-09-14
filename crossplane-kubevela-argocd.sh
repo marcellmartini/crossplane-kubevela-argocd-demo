@@ -25,8 +25,14 @@
 
 # Create a Kuberentes cluster with Ingress. It can be a local (e.g., KinD, minikube, etc.) or a remote cluster.
 
+# Create a k8s cluster with minikube
+minikube start --driver=docker --nodes 2
+
+# Enable ingress
+minikube addons enable ingress
+
 # Replace `[...]` with the external IP of the Ingress service
-export INGRESS_HOST="192.168.49.2"
+export INGRESS_HOST="$(minikube ip)"
 
 # Replace `[...]` with the GitHub organization or user
 export GITHUB_ORG="marcellmartini"
@@ -41,29 +47,35 @@ cd crossplane-kubevela-argocd-demo
 
 export REPO_URL=https://github.com/$GITHUB_ORG/crossplane-kubevela-argocd-demo
 
-cat production/sealed-secrets.yaml \
-    | sed -e "s@repoURL: .*@repoURL: $REPO_URL@g" \
-    | tee production/sealed-secrets.yaml
+cat production/sealed-secrets.yaml |
+    sed -e "s@repoURL: .*@repoURL: $REPO_URL@g" |
+    tee production/sealed-secrets.yaml
 
-cat production/crossplane.yaml \
-    | sed -e "s@repoURL: https://github.com.*@repoURL: $REPO_URL@g" \
-    | tee production/crossplane.yaml
+cat production/crossplane.yaml |
+    sed -e "s@repoURL: https://github.com.*@repoURL: $REPO_URL@g" |
+    tee production/crossplane.yaml
 
-cat production/team-a-infra.yaml \
-    | sed -e "s@repoURL: .*@repoURL: $REPO_URL@g" \
-    | tee production/team-a-infra.yaml
+cat production/team-a-infra.yaml |
+    sed -e "s@repoURL: .*@repoURL: $REPO_URL@g" |
+    tee production/team-a-infra.yaml
 
-cat orig/team-app-reqs.yaml \
-    | sed -e "s@repoURL: .*@repoURL: $REPO_URL@g" \
-    | tee orig/team-app-reqs.yaml
+cat orig/team-app-reqs.yaml |
+    sed -e "s@repoURL: .*@repoURL: $REPO_URL@g" |
+    tee orig/team-app-reqs.yaml
 
-cat orig/team-apps.yaml \
-    | sed -e "s@repoURL: .*@repoURL: $REPO_URL@g" \
-    | tee orig/team-apps.yaml
+cat orig/team-apps.yaml |
+    sed -e "s@repoURL: .*@repoURL: $REPO_URL@g" |
+    tee orig/team-apps.yaml
 
-cat apps.yaml \
-    | sed -e "s@repoURL: .*@repoURL: $REPO_URL@g" \
-    | tee apps.yaml
+cat apps.yaml |
+    sed -e "s@repoURL: .*@repoURL: $REPO_URL@g" |
+    tee apps.yaml
+
+SEALED_SECRETS_CONTROLLER_VERSION="$(curl -s https://api.github.com/repos/bitnami-labs/sealed-secrets/releases/latest |
+    jq -r '.tag_name')"
+
+curl -sSL "https://github.com/bitnami-labs/sealed-secrets/releases/download/${SEALED_SECRETS_CONTROLLER_VERSION}/controller.yaml" \
+    -o sealed-secrets/controller.yaml
 
 kubectl apply --filename sealed-secrets
 
@@ -72,10 +84,10 @@ kubectl apply --filename sealed-secrets
 #############
 
 # Replace `[...]` with your access key ID`
-export AWS_ACCESS_KEY_ID=[...]
+# export AWS_ACCESS_KEY_ID=[...]
 
 # Replace `[...]` with your secret access key
-export AWS_SECRET_ACCESS_KEY=[...]
+# export AWS_SECRET_ACCESS_KEY=[...]
 
 echo "[default]
 aws_access_key_id = $AWS_ACCESS_KEY_ID
@@ -86,9 +98,9 @@ kubectl --namespace crossplane-system \
     create secret generic aws-creds \
     --from-file creds=./aws-creds.conf \
     --output json \
-    --dry-run=client \
-    | kubeseal --format yaml \
-    | tee crossplane-configs/aws-creds.yaml
+    --dry-run=client |
+    kubeseal --format yaml |
+    tee crossplane-configs/aws-creds.yaml
 
 #################
 # Setup Argo CD #
@@ -100,30 +112,40 @@ git commit -m "Personalization"
 
 git push
 
-helm repo add argo \
-    https://argoproj.github.io/argo-helm
+# Create argocd namespace
+kubectl create namespace argocd
 
-helm repo update
+# Install argocd
+kubectl apply -n argocd -f argocd/install.yml
 
-helm upgrade --install \
-    argocd argo/argo-cd \
-    --namespace argocd \
-    --create-namespace \
-    --set server.ingress.hosts="{argo-cd.$INGRESS_HOST.nip.io}" \
-    --set server.ingress.enabled=true \
-    --set server.extraArgs="{--insecure}" \
-    --set controller.args.appResyncPeriod=30 \
-    --wait
+cat argocd/ingress.yml |
+    sed -e "s@<minikube_ip>@${INGRESS_HOST}@g" |
+    tee argocd/ingress.yml
 
-kubectl apply --filename project.yaml
+kubectl apply -f argocd/ingress.yml
 
-kubectl apply --filename apps.yaml
+kubectl apply -f argocd/grpc-ingress.yml
+
+# helm repo add argo \
+#     https://argoproj.github.io/argo-helm
+
+# helm repo update
+
+# helm upgrade --install \
+#     argocd argo/argo-cd \
+#     --namespace argocd \
+#     --create-namespace \
+#     --set server.ingress.hosts="{argo-cd.$INGRESS_HOST.nip.io}" \
+#     --set server.ingress.enabled=true \
+#     --set server.extraArgs="{--insecure}" \
+#     --set controller.args.appResyncPeriod=30 \
+#     --wait
 
 export PASS=$(kubectl \
     --namespace argocd \
     get secret argocd-initial-admin-secret \
-    --output jsonpath="{.data.password}" \
-    | base64 --decode)
+    --output jsonpath="{.data.password}" |
+    base64 --decode)
 
 argocd login \
     --insecure \
@@ -137,6 +159,12 @@ argocd account update-password \
     --new-password admin123
 
 echo http://argo-cd.$INGRESS_HOST.nip.io
+
+kubectl create namespace production
+
+kubectl apply --filename project.yaml
+
+kubectl apply --filename apps.yaml
 
 # Open it in a browser
 
@@ -207,7 +235,7 @@ cat apps.yaml
 ls -1 production
 
 # In the second terminal
-cat production/team-a-infra.yaml 
+cat production/team-a-infra.yaml
 
 # In the second terminal
 ls -1 team-a-infra
