@@ -10,8 +10,8 @@ spec:
   project: production
   source:
     chart: vela-core
-    repoURL: https://charts.kubevela.net/core
-    targetRevision: "1.0.7"
+    repoURL: https://kubevela.github.io/charts
+    targetRevision: "1.9.6"
   destination:
     namespace: vela-system
     server: https://kubernetes.default.svc
