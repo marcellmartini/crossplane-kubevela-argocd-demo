@@ -2,6 +2,7 @@ apiVersion: core.oam.dev/v1beta1
 kind: ComponentDefinition
 metadata:
   name: backend
+  namespace: vela-system
   annotations:
     definition.oam.dev/description: "It's backend and I'm too lazy to write descriptions"
 spec:
@@ -42,11 +43,11 @@ spec:
         }
 
 ---
-
 apiVersion: core.oam.dev/v1beta1
 kind: ComponentDefinition
 metadata:
   name: frontend
+  namespace: vela-system
   annotations:
     definition.oam.dev/description: "It's frontend and I'm too lazy to write descriptions"
 spec:
@@ -69,47 +70,47 @@ spec:
                 app.oam.dev/component: frontend
             spec:
               containers:
-              - name: frontend
-                ports:
-                - containerPort: 80
-                livenessProbe:
-                  httpGet:
-                    path: /
-                    port: 80
-                readinessProbe:
-                  httpGet:
-                    path: /
-                    port: 80
+                - name: frontend
+                  ports:
+                    - containerPort: 80
+                  livenessProbe:
+                    httpGet:
+                      path: /
+                      port: 80
+                  readinessProbe:
+                    httpGet:
+                      path: /
+                      port: 80
       parameters:
-      - name: name
-        required: true
-        type: string
-        fieldPaths:
-        - metadata.name
-        - metadata.labels.app
-        - spec.selector.matchLabels.app
-        - spec.template.metadata.labels.app
-      - name: image
-        required: true
-        type: string
-        fieldPaths:
-        - spec.template.spec.containers[0].image
-      - name: port
-        required: false
-        type: number
-        fieldPaths:
-        - spec.template.spec.containers[0].ports[0].containerPort
-        - spec.template.spec.containers[0].livenessProbe.httpGet.port
-        - spec.template.spec.containers[0].readinessProbe.httpGet.port
+        - name: name
+          required: true
+          type: string
+          fieldPaths:
+            - metadata.name
+            - metadata.labels.app
+            - spec.selector.matchLabels.app
+            - spec.template.metadata.labels.app
+        - name: image
+          required: true
+          type: string
+          fieldPaths:
+            - spec.template.spec.containers[0].image
+        - name: port
+          required: false
+          type: number
+          fieldPaths:
+            - spec.template.spec.containers[0].ports[0].containerPort
+            - spec.template.spec.containers[0].livenessProbe.httpGet.port
+            - spec.template.spec.containers[0].readinessProbe.httpGet.port
 
 ---
-
 apiVersion: core.oam.dev/v1beta1
 kind: TraitDefinition
 metadata:
+  name: autoscaler
+  namespace: vela-system
   annotations:
     definition.oam.dev/description: "configure k8s HPA for Deployment"
-  name: autoscaler
 spec:
   appliesToWorkloads:
     - frontend
