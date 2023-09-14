@@ -17,8 +17,8 @@ spec:
                 name: argocd-server
                 port:
                   name: https
-      host: grpc.argocd.info
+      host: grpc.argo-cd.<minikube_ip>.nip.io
   tls:
     - hosts:
-        - grpc.argocd.info
+        - grpc.argo-cd.<minikube_ip>.nip.io
       secretName: argocd-ingress-grpc
