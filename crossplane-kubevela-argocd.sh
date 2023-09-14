@@ -166,6 +166,8 @@ kubectl apply --filename project.yaml
 
 kubectl apply --filename apps.yaml
 
+kubectl apply --filename team-app-reqs/kubevela.yaml
+
 # Open it in a browser
 
 # Use `admin` as both the username and password
