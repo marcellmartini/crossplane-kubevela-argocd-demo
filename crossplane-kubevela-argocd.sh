@@ -26,7 +26,7 @@
 # Create a Kuberentes cluster with Ingress. It can be a local (e.g., KinD, minikube, etc.) or a remote cluster.
 
 # Create a k8s cluster with minikube
-minikube start --driver=docker --nodes 2
+minikube start --driver=docker --nodes 4
 
 # Enable ingress
 minikube addons enable ingress
@@ -124,7 +124,7 @@ cat argocd/ingress.yml |
 
 kubectl apply -f argocd/ingress.yml
 
-kubectl apply -f argocd/grpc-ingress.yml
+# kubectl apply -f argocd/grpc-ingress.yml
 
 # helm repo add argo \
 #     https://argoproj.github.io/argo-helm
@@ -152,7 +152,7 @@ argocd login \
     --username admin \
     --password $PASS \
     --grpc-web \
-    argo-cd.$INGRESS_HOST.nip.io
+    argocd.$INGRESS_HOST.nip.io
 
 argocd account update-password \
     --current-password $PASS \

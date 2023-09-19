@@ -17,8 +17,8 @@ spec:
                 name: argocd-server
                 port:
                   name: https
-      host: grpc.argocd.info
+      host: argocd.192.168.49.2.nip.io
   tls:
     - hosts:
-        - grpc.argocd.info
+        - argocd.192.168.49.2.nip.io
       secretName: argocd-ingress-grpc
