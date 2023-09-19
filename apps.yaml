@@ -10,7 +10,7 @@ spec:
   project: production
   source:
     repoURL: https://github.com/marcellmartini/crossplane-kubevela-argocd-demo
-    targetRevision: old-master
+    targetRevision: presentation
     path: production
   destination:
     server: https://kubernetes.default.svc
