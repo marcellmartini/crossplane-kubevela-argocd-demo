@@ -158,7 +158,7 @@ argocd account update-password \
     --current-password $PASS \
     --new-password admin123
 
-echo http://argo-cd.$INGRESS_HOST.nip.io
+echo http://argocd.$INGRESS_HOST.nip.io
 
 kubectl create namespace production
 
